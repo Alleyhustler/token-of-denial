@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token of Denial</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --text: #e0e0e0;
+            --accent: #606060;
+            --error: #703735;
+            --link: #4a90e2;
+            --font-mono: 'GT America Mono', monospace;
+            --font-display: 'Neue Haas Grotesk Display', sans-serif;
+        }
+        
+        @font-face {
+            font-family: 'GT America Mono';
+            src: url('https://fonts.cdnfonts.com/css/gt-america-mono') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'Neue Haas Grotesk Display';
+            src: url('https://fonts.cdnfonts.com/css/neue-haas-grotesk-display-pro') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-display);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 800px;
+            text-align: center;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 4rem;
+            font-weight: 500;
+            letter-spacing: -0.03em;
+            margin: 0 0 1rem;
+            line-height: 1;
+            text-transform: uppercase;
+        }
+        
+        .subtext {
+            font-size: 1.1rem;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            margin-bottom: 3rem;
+            letter-spacing: 0.02em;
+        }
+        
+        .visible {
+            opacity: 1;
+        }
+        
+        .proceed-btn {
+            position: absolute;
+            bottom: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--text);
+            padding: 0.5rem 1.5rem;
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, bottom 0.3s ease-in-out;
+            outline: none;
+            letter-spacing: 0.05em;
+        }
+        
+        .proceed-btn.visible {
+            opacity: 0.8;
+            bottom: -50px;
+        }
+        
+        .proceed-btn:hover {
+            opacity: 1;
+            border-color: var(--text);
+        }
+        
+        /* Why page */
+        .why-container {
+            display: none;
+            width: 90%;
+            max-width: 600px;
+        }
+        
+        .why-question {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            letter-spacing: 0.01em;
+        }
+        
+        .response-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--accent);
+            color: var(--text);
+            font-family: var(--font-display);
+            font-size: 1rem;
+            padding: 0.5rem 0;
+            margin-bottom: 2rem;
+            outline: none;
+            text-align: center;
+        }
+        
+        .submit-btn {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 0.5rem 1.5rem;
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            cursor: not-allowed;
+            outline: none;
+            letter-spacing: 0.05em;
+        }
+        
+        .warning-text {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        
+        .warning-text.visible {
+            opacity: 1;
+        }
+        
+        /* Terminal page */
+        .terminal-container {
+            display: none;
+            width: 90%;
+            max-width: 800px;
+            font-family: var(--font-mono);
+            border: 1px solid var(--accent);
+            padding: 1.5rem;
+            position: relative;
+        }
+        
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            font-size: 0.7rem;
+            color: var(--accent);
+            letter-spacing: 0.05em;
+        }
+        
+        .terminal-body {
+            line-height: 1.6;
+        }
+        
+        .prompt-line {
+            display: flex;
+            margin-bottom: 0.5rem;
+        }
+        
+        .prompt {
+            color: var(--accent);
+            margin-right: 0.5rem;
+        }
+        
+        .command {
+            color: var(--text);
+        }
+        
+        .response {
+            color: var(--error);
+            margin-bottom: 0.5rem;
+        }
+        
+        .blinking-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1em;
+            background-color: var(--text);
+            animation: blink 1s step-end infinite;
+            margin-left: 0.25rem;
+            vertical-align: middle;
+        }
+        
+        /* Info links */
+        .info-links {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            text-align: right;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        
+        .info-links a {
+            color: var(--link);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.5rem;
+            transition: opacity 0.3s;
+        }
+        
+        .info-links a:hover {
+            opacity: 1;
+        }
+        
+        /* Floating logo */
+        .logo {
+            position: absolute;
+            top: 130px;
+            left: 840px;
+            width: 250px;
+            height: 250px;
+            opacity: 0.8;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        /* Fade transitions */
+        .fade-out {
+            animation: fadeOut 0.6s forwards;
+        }
+        
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Logo -->
+    <img src="Progetto senza titolo (3).png" alt="Token Logo" class="logo" id="logo">
+
+    <!-- Info Links (Twitter and CA) -->
+    <div class="info-links">
+        <a href="https://twitter.com/tokenofdenial" target="_blank">Follow on 𝕏</a>
+        <a href="" target="_blank">CA: HERE</a>
+    </div>
+
+    <!-- Homepage -->
+    <div class="container" id="homepage">
+        <h1>Access Denied</h1>
+        <div class="subtext" id="subtext">You don't meet the requirements to view this token.</div>
+        <button class="proceed-btn" id="proceedBtn">Proceed Anyway</button>
+    </div>
+    
+    <!-- Why page -->
+    <div class="why-container" id="whyPage">
+        <div class="why-question">Why do you want to see the Token of Denial?</div>
+        <input type="text" class="response-input" id="responseInput" autocomplete="off">
+        <button class="submit-btn" id="submitBtn">That's not a valid reason.</button>
+        <div class="warning-text" id="warningText">Fine. But don't say we didn't warn you.</div>
+    </div>
+    
+    <!-- Terminal page -->
+    <div class="terminal-container" id="terminal">
+        <div class="terminal-header">
+            <span>denial_terminal v1.0.3</span>
+            <span>connection: unauthorized</span>
+        </div>
+        <div class="terminal-body" id="terminalBody">
+            <div class="prompt-line">
+                <span class="prompt">></span>
+                <span class="command">connect token</span>
+            </div>
+            <div class="response">Permission denied.</div>
+            
+            <div class="prompt-line">
+                <span class="prompt">></span>
+                <span class="command">mint token</span>
+            </div>
+            <div class="response">You are not eligible.</div>
+            
+            <div class="prompt-line">
+                <span class="prompt">></span>
+                <span class="command">request info</span>
+            </div>
+            <div class="response">Access forbidden.</div>
+            
+            <div class="prompt-line">
+                <span class="prompt">></span>
+                <span class="command">whoami</span>
+            </div>
+            <div class="response">Nobody.</div>
+            
+            <div class="prompt-line" id="autoCommand">
+                <span class="prompt">></span>
+                <span class="command"></span>
+                <span class="blinking-cursor"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Preload fonts
+            document.fonts.ready.then(() => {
+                // Homepage flow
+                const subtext = document.getElementById('subtext');
+                const proceedBtn = document.getElementById('proceedBtn');
+                const homepage = document.getElementById('homepage');
+                const whyPage = document.getElementById('whyPage');
+                const terminal = document.getElementById('terminal');
+                const logo = document.getElementById('logo');
+                
+                // Show subtext immediately
+                setTimeout(() => subtext.classList.add('visible'), 300);
+                
+                // Show proceed button after shorter delay
+                setTimeout(() => proceedBtn.classList.add('visible'), 1000);
+                
+                // Proceed to why page
+                proceedBtn.addEventListener('click', () => {
+                    homepage.classList.add('fade-out');
+                    setTimeout(() => {
+                        homepage.style.display = 'none';
+                        whyPage.style.display = 'block';
+                        whyPage.classList.add('fade-in');
+                        document.getElementById('responseInput').focus();
+                    }, 600);
+                });
+                
+                // Why page flow
+                const responseInput = document.getElementById('responseInput');
+                const submitBtn = document.getElementById('submitBtn');
+                const warningText = document.getElementById('warningText');
+                let attemptCount = 0;
+                
+                responseInput.addEventListener('input', () => {
+                    submitBtn.style.cursor = 'not-allowed';
+                    submitBtn.style.color = 'var(--accent)';
+                });
+                
+                submitBtn.addEventListener('click', () => {
+                    attemptCount++;
+                    
+                    if (attemptCount >= 2) {
+                        warningText.classList.add('visible');
+                        setTimeout(() => {
+                            whyPage.classList.add('fade-out');
+                            setTimeout(() => {
+                                whyPage.style.display = 'none';
+                                terminal.style.display = 'block';
+                                terminal.classList.add('fade-in');
+                                startTerminalFlow();
+                            }, 600);
+                        }, 1000);
+                    } else {
+                        submitBtn.style.transform = 'translateX(-3px)';
+                        setTimeout(() => {
+                            submitBtn.style.transform = 'translateX(3px)';
+                            setTimeout(() => {
+                                submitBtn.style.transform = 'translateX(0)';
+                            }, 30);
+                        }, 30);
+                    }
+                });
+                
+                // Terminal flow
+                function startTerminalFlow() {
+                    const autoCommand = document.getElementById('autoCommand');
+                    const commandText = autoCommand.querySelector('.command');
+                    
+                    setTimeout(() => {
+                        typeText(commandText, 'denial.exe --accept', () => {
+                            setTimeout(() => {
+                                const response = document.createElement('div');
+                                response.className = 'response';
+                                response.textContent = 'System error. You already accepted.';
+                                terminal.insertBefore(response, autoCommand.nextSibling);
+                                
+                                setTimeout(() => {
+                                    autoCommand.querySelector('.blinking-cursor').style.display = 'none';
+                                }, 300);
+                            }, 300);
+                        });
+                    }, 1000);
+                }
+                
+                function typeText(element, text, callback) {
+                    let i = 0;
+                    const typing = setInterval(() => {
+                        if (i < text.length) {
+                            element.textContent += text.charAt(i);
+                            i++;
+                        } else {
+                            clearInterval(typing);
+                            if (callback) callback();
+                        }
+                    }, 30);
+                }
+
+                // Make logo visible after fonts load
+                setTimeout(() => {
+                    logo.style.opacity = '0.8';
+                }, 500);
+            });
+        });
+    </script>
+</body>
+</html>
